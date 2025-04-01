@@ -1,35 +1,33 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { v4 as uuidv4 } from "uuid"
-import Chatboticon from "@/components/chatboticon"
-import ChatForm from "@/components/chatform"
-import ChatMessage from "@/components/chatmessage"
-import QuickResponse from "@/components/quick-response"
+import { useState, useEffect, useRef } from "react";
+import { v4 as uuidv4 } from "uuid";
+import Chatboticon from "@/components/chatboticon";
+import ChatForm from "@/components/chatform";
+import ChatMessage from "@/components/chatmessage";
+import QuickResponse from "@/components/quick-response";
 
 export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [showLoginForm, setShowLoginForm] = useState(false)
-  const [loginForm, setLoginForm] = useState({ email: "", password: "" })
-  const [loginError, setLoginError] = useState("")
-  const [showChatbot, setShowChatbot] = useState(false)
+  const [email, setEmail] = useState("");
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [showChatbot, setShowChatbot] = useState(false);
   const [chatHistory, setChatHistory] = useState<
     { id: string; user: string; bot: string; rated?: "up" | "down" | null }[]
-  >([])
-  const [isTyping, setIsTyping] = useState(false)
-  const chatBodyRef = useRef<HTMLDivElement | null>(null)
+  >([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const chatBodyRef = useRef<HTMLDivElement | null>(null);
 
-  const toggleChatbot = () => setShowChatbot((prev) => !prev)
+  const toggleChatbot = () => setShowChatbot((prev) => !prev);
 
   const generateBotResponse = async (
     fullChatHistory: { user: string; bot: string }[]
   ): Promise<string> => {
-    setIsTyping(true)
-    const latestUserMessage = fullChatHistory[fullChatHistory.length - 1].user
+    setIsTyping(true);
+    const latestUserMessage = fullChatHistory[fullChatHistory.length - 1].user;
 
     if (latestUserMessage === "Show me your products") {
-      setIsTyping(false)
-      return "__products__"
+      setIsTyping(false);
+      return "__products__";
     }
 
     try {
@@ -49,70 +47,63 @@ export default function Home() {
               parts: [{ text: latestUserMessage }],
             }),
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       return (
         data?.candidates?.[0]?.content?.parts?.[0]?.text ||
         "Sorry, I didn’t understand that."
-      )
+      );
     } catch (err) {
-      return "⚠️ Failed to reach API. Please try again later."
+      return "⚠️ Failed to reach API. Please try again later.";
     } finally {
-      setIsTyping(false)
+      setIsTyping(false);
     }
-  }
+  };
 
   const handleQuickResponse = (question: string) => {
-    if (isTyping) return
-    const newId = uuidv4()
+    if (isTyping) return;
+    const newId = uuidv4();
 
     setChatHistory((prev) => [
       ...prev,
       { id: newId, user: question, bot: "Thinking ..." },
-    ])
+    ]);
 
     setTimeout(() => {
       generateBotResponse([...chatHistory, { user: question, bot: "Thinking ..." }]).then(
         (response) => {
           setChatHistory((prev) => {
-            const updated = [...prev]
-            const index = updated.findIndex((m) => m.id === newId)
+            const updated = [...prev];
+            const index = updated.findIndex((m) => m.id === newId);
             if (index !== -1) {
-              updated[index].bot = response
+              updated[index].bot = response;
             }
-            return updated
-          })
+            return updated;
+          });
         }
-      )
-    }, 1000)
-  }
+      );
+    }, 1000);
+  };
 
   const handleRateResponse = (id: string, rating: "up" | "down") => {
     setChatHistory((prev) =>
       prev.map((chat) => (chat.id === id ? { ...chat, rated: rating } : chat))
-    )
-  }
+    );
+  };
 
   useEffect(() => {
     if (chatBodyRef.current) {
-      chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight
+      chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
     }
-  }, [chatHistory, isTyping])
+  }, [chatHistory, isTyping]);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (
-      loginForm.email === "demo@example.com" &&
-      loginForm.password === "123456"
-    ) {
-      setIsLoggedIn(true)
-      setShowLoginForm(false)
-      setLoginError("")
-    } else {
-      setLoginError("Invalid email or password")
+  const handleEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.trim()) {
+      setEmailSubmitted(true);
     }
-  }
+  };
 
   return (
     <div className={`container ${showChatbot ? "show-chatbot" : ""}`}>
@@ -121,48 +112,8 @@ export default function Home() {
       </button>
 
       {showChatbot && (
-        <div className="chatbot-popup" style={{ position: "relative" }}>
-          {!isLoggedIn && (
-            <div className="login-overlay">
-              {showLoginForm ? (
-                <form className="login-form" onSubmit={handleLogin}>
-                  <h3>🔐 Secure Login</h3>
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    value={loginForm.email}
-                    onChange={(e) =>
-                      setLoginForm({ ...loginForm, email: e.target.value })
-                    }
-                    required
-                  />
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    value={loginForm.password}
-                    onChange={(e) =>
-                      setLoginForm({ ...loginForm, password: e.target.value })
-                    }
-                    required
-                  />
-                  {loginError && <p className="error-text">{loginError}</p>}
-                  <button type="submit" className="btn-login">
-                    Log In
-                  </button>
-                  <p className="demo-hint">Demo: demo@example.com / 123456</p>
-                </form>
-              ) : (
-                <div className="login-cta">
-                  <h3>🔒 Login Required</h3>
-                  <p>Please log in to use the chatbot.</p>
-                  <button onClick={() => setShowLoginForm(true)} className="btn-login">
-                    Log in
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
+        <div className="chatbot-popup">
+          {/* Header always visible */}
           <div className="chatbot-header">
             <div className="header-info">
               <Chatboticon />
@@ -176,41 +127,61 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="chat-body" id="chatBody" ref={chatBodyRef}>
-            <div className="message bot-message">
-              <div className="message-text">
-                <p>Hello! How can I assist you today?</p>
-                <div className="quick-responses">
-                  <p className="quick-label">🛍️ Our Products</p>
-                  <QuickResponse
-                    text="🛒 View Products"
-                    onClick={() => handleQuickResponse("Show me your products")}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {chatHistory.map((chat) => (
-              <ChatMessage
-                key={chat.id}
-                chat={chat}
-                onRate={(id: string, rating: "up" | "down") =>
-                  handleRateResponse(id, rating)
-                }
+          {!emailSubmitted ? (
+            <form className="login-form" onSubmit={handleEmailSubmit}>
+              <h3>Saman is Here 💬</h3>
+              <p style={{ fontSize: "14px", marginBottom: "20px" }}>
+                Enter your email to start the conversation
+              </p>
+              <input
+                type="email"
+                placeholder="you@business.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
-            ))}
-          </div>
+              <button type="submit" className="btn-login">
+                Start Chat
+              </button>
+              <p className="footer-note">Powered by ❤️ with <strong>Enored</strong></p>
+            </form>
+          ) : (
+            <>
+              <div className="chat-body" ref={chatBodyRef}>
+                <div className="message bot-message">
+                  <div className="message-text">
+                    <p>Hello! How can I assist you today?</p>
+                    <div className="quick-responses">
+                      <p className="quick-label">🛍️ Our Products</p>
+                      <QuickResponse
+                        text="🛒 View Products"
+                        onClick={() => handleQuickResponse("Show me your products")}
+                      />
+                    </div>
+                  </div>
+                </div>
 
-          <div className="chatbot-footer">
-            <ChatForm
-              chatHistory={chatHistory}
-              setChatHistory={setChatHistory}
-              generateBotResponse={generateBotResponse}
-              setIsTyping={setIsTyping}
-            />
-          </div>
+                {chatHistory.map((chat) => (
+                  <ChatMessage
+                    key={chat.id}
+                    chat={chat}
+                    onRate={handleRateResponse}
+                  />
+                ))}
+              </div>
+
+              <div className="chatbot-footer">
+                <ChatForm
+                  chatHistory={chatHistory}
+                  setChatHistory={setChatHistory}
+                  generateBotResponse={generateBotResponse}
+                  setIsTyping={setIsTyping}
+                />
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
-  )
+  );
 }
