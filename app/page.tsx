@@ -33,28 +33,28 @@ export default function Home() {
     try {
       const response = await fetch(process.env.NEXT_PUBLIC_API_URL || "", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_KEY}`,
+        },
         body: JSON.stringify({
-          contents: fullChatHistory
-            .map((msg) => [
-              { role: "user", parts: [{ text: msg.user }] },
-              { role: "model", parts: [{ text: msg.bot }] },
-            ])
-            .flat()
-            .slice(0, -1)
-            .concat({
-              role: "user",
-              parts: [{ text: latestUserMessage }],
-            }),
+          model: process.env.NEXT_PUBLIC_AI_MODEL || "openchat/openchat-7b",
+          messages: [
+            ...fullChatHistory.flatMap((msg) => [
+              { role: "user", content: msg.user },
+              { role: "assistant", content: msg.bot },
+            ]),
+            { role: "user", content: latestUserMessage },
+          ],
         }),
       });
 
       const data = await response.json();
-      return (
-        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "Sorry, I didn’t understand that."
-      );
+      const reply = data?.choices?.[0]?.message?.content;
+
+      return reply || "⚠️ Bot gave an empty response. (No content returned)";
     } catch (err) {
+      console.error("API error:", err);
       return "⚠️ Failed to reach API. Please try again later.";
     } finally {
       setIsTyping(false);
