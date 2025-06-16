@@ -3,7 +3,7 @@ import avatar from "../app/img/image.png";
 
 export default function Chatboticon() {
   return (
-    <div className="avatar-container animate-bounce transition-all duration-300">
+    <div className="avatar-container transition-all duration-300">
       <Image
         src={avatar}
         alt="Chatbot Avatar"

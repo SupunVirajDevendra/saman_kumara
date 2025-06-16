@@ -107,7 +107,7 @@ export default function Home() {
 
   return (
     <div className={`container ${showChatbot ? "show-chatbot" : ""}`}>
-      <button onClick={toggleChatbot} id="chatbot-toggler">
+      <button onClick={toggleChatbot} id="chatbot-toggler" className="transition-transform duration-300 hover:scale-105">
         <span className="material-symbols-rounded">chat</span>
       </button>
 
@@ -119,17 +119,17 @@ export default function Home() {
               <Chatboticon />
               <div className="header-text">
                 <p className="status-text">We typically reply in a few minutes.</p>
-                <h2 className="logo-text">Saman Kumara</h2>
+                <h2 className="logo-text">Lia</h2>
               </div>
             </div>
-            <button className="material-symbols-rounded" onClick={toggleChatbot}>
+            <button className="material-symbols-rounded transition-transform duration-300 hover:rotate-180" onClick={toggleChatbot}>
               expand_more
             </button>
           </div>
 
           {!emailSubmitted ? (
             <form className="login-form" onSubmit={handleEmailSubmit}>
-              <h3>Saman is Here 💬</h3>
+              <h3>Lia is Here 💬</h3>
               <p style={{ fontSize: "14px", marginBottom: "20px" }}>
                 Enter your email to start the conversation
               </p>
@@ -139,11 +139,12 @@ export default function Home() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="transition-all duration-300 focus:ring-2 focus:ring-indigo-500"
               />
-              <button type="submit" className="btn-login">
+              <button type="submit" className="btn-login transition-all duration-300 hover:shadow-lg">
                 Start Chat
               </button>
-              <p className="footer-note">Powered by ❤️ with <strong>Enored</strong></p>
+              <p className="footer-note">Powered by ❤️ with <strong>Helaart</strong></p>
             </form>
           ) : (
             <>
