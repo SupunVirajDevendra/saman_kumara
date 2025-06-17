@@ -145,7 +145,7 @@ body {
 }
 
 .text-gray-600 {
-  color: #94a3b8 !important;
+  color:rgb(0, 0, 0) !important;
 }
 
 .text-gray-500 {
@@ -646,6 +646,7 @@ body {
   flex: 1;
   font-size: 14px;
   padding: 8px 12px;
+  color: #000000;
 }
 
 .send-button {
@@ -956,6 +957,7 @@ body {
   border-radius: 8px;
   font-size: 14px;
   transition: border 0.2s ease;
+  color: #000000;
 }
 
 .login-form input:focus {
